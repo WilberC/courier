@@ -55,18 +55,18 @@ Note: for this project, the normal local runtime should use Docker Compose so AP
 ## Phase 2 - Database (SQLite + ORM)
 
 ### Data Layer Checklist
-- [ ] Create ORM models with SQLModel
-- [ ] Define initial entities:
-- [ ] `Event` (source, type, payload, status, created_at)
-- [ ] `CommandLog` (user_id, command, result, created_at)
-- [ ] `ActionRun` (action_name, status, output, created_at)
-- [ ] Add DB session management
-- [ ] Add DB initialization on startup
+- [x] Create ORM models with SQLModel
+- [x] Define initial entities:
+- [x] `Event` (source, type, payload, status, created_at)
+- [x] `CommandLog` (user_id, command, result, created_at)
+- [x] `ActionRun` (action_name, status, output, created_at)
+- [x] Add DB session management
+- [x] Add DB initialization on startup
 
 ### Persistence Checklist
-- [ ] Confirm records are created/read correctly
-- [ ] Add indexes for common lookups (status, created_at)
-- [ ] Add retention plan for old logs/events
+- [x] Confirm records are created/read correctly
+- [x] Add indexes for common lookups (status, created_at)
+- [x] Add retention plan for old logs/events
 
 ## Phase 3 - API Service (FastAPI)
 
