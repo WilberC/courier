@@ -20,6 +20,7 @@ def test_get_settings_uses_safe_defaults_in_development(monkeypatch: pytest.Monk
     assert settings.telegram_bot_token == "dev-placeholder-token"
     assert settings.api_shared_secret == "dev-shared-secret"
     assert settings.telegram_allowed_user_ids == [1]
+    assert settings.telegram_admin_user_ids == [1]
 
 
 def test_get_settings_validates_production_required_vars(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -43,6 +44,11 @@ def test_parse_allowed_user_ids_rejects_invalid_values() -> None:
         settings_module._parse_allowed_user_ids("1,abc,3")
 
 
+def test_parse_positive_int_rejects_invalid_values() -> None:
+    with pytest.raises(ValueError):
+        settings_module._parse_positive_int("EVENT_MAX_PAYLOAD_BYTES", "abc", 100)
+
+
 def test_validate_required_rejects_empty_database_and_redis_urls() -> None:
     settings = settings_module.Settings(
         app_env="development",
@@ -51,7 +57,10 @@ def test_validate_required_rejects_empty_database_and_redis_urls() -> None:
         redis_url="",
         telegram_bot_token="dev-token",
         telegram_allowed_user_ids=[1],
+        telegram_admin_user_ids=[1],
         api_shared_secret="dev-secret",
+        event_rate_limit_per_minute=60,
+        event_max_payload_bytes=32768,
     )
 
     with pytest.raises(ValueError) as excinfo:

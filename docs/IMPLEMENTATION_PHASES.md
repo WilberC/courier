@@ -71,30 +71,30 @@ Note: for this project, the normal local runtime should use Docker Compose so AP
 ## Phase 3 - API Service (FastAPI)
 
 ### API Checklist
-- [ ] Create `/health` endpoint
-- [ ] Create `POST /events` endpoint
-- [ ] Validate request schema
-- [ ] Add auth for ingestion endpoint (shared secret)
-- [ ] Return clear success/error responses
+- [x] Create `/health` endpoint
+- [x] Create `POST /events` endpoint
+- [x] Validate request schema
+- [x] Add auth for ingestion endpoint (shared secret)
+- [x] Return clear success/error responses
 
 ### API Safety Checklist
-- [ ] Rate limit or throttle inbound events if needed
-- [ ] Reject oversized payloads
-- [ ] Sanitize/normalize event metadata
+- [x] Rate limit or throttle inbound events if needed
+- [x] Reject oversized payloads
+- [x] Sanitize/normalize event metadata
 
 ## Phase 4 - Bot Service (Telegram)
 
 ### Bot Commands Checklist
-- [ ] `/ping` command
-- [ ] `/help` command
-- [ ] `/status` command
-- [ ] `/last_errors` command
-- [ ] `/run <task>` command (whitelisted)
+- [x] `/ping` command
+- [x] `/help` command
+- [x] `/status` command
+- [x] `/last_errors` command
+- [x] `/run <task>` command (whitelisted)
 
 ### Access Control Checklist
-- [ ] Restrict commands to allowed user IDs
-- [ ] Add role split (admin vs viewer) if needed
-- [ ] Log each command usage
+- [x] Restrict commands to allowed user IDs
+- [x] Add role split (admin vs viewer) if needed
+- [x] Log each command usage
 
 ## Phase 5 - Background Jobs (Celery + Redis)
 

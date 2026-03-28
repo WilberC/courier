@@ -13,7 +13,10 @@ class Settings:
     redis_url: str
     telegram_bot_token: str
     telegram_allowed_user_ids: list[int]
+    telegram_admin_user_ids: list[int]
     api_shared_secret: str
+    event_rate_limit_per_minute: int
+    event_max_payload_bytes: int
     sentry_dsn: str | None = None
 
     @property
@@ -54,6 +57,19 @@ def _parse_allowed_user_ids(raw: str) -> list[int]:
         ) from exc
 
 
+def _parse_positive_int(name: str, raw: str, default: int) -> int:
+    value = raw.strip() if raw else ""
+    if not value:
+        return default
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be an integer") from exc
+    if parsed <= 0:
+        raise ValueError(f"{name} must be > 0")
+    return parsed
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     app_env = os.getenv("APP_ENV", "development")
@@ -62,6 +78,7 @@ def get_settings() -> Settings:
     token_default = "dev-placeholder-token" if app_env != "production" else ""
     secret_default = "dev-shared-secret" if app_env != "production" else ""
     allowed_ids_default = "1" if app_env != "production" else ""
+    admin_ids_default = allowed_ids_default
 
     settings = Settings(
         app_env=app_env,
@@ -72,7 +89,20 @@ def get_settings() -> Settings:
         telegram_allowed_user_ids=_parse_allowed_user_ids(
             os.getenv("TELEGRAM_ALLOWED_USER_IDS", allowed_ids_default)
         ),
+        telegram_admin_user_ids=_parse_allowed_user_ids(
+            os.getenv("TELEGRAM_ADMIN_USER_IDS", admin_ids_default)
+        ),
         api_shared_secret=os.getenv("API_SHARED_SECRET", secret_default),
+        event_rate_limit_per_minute=_parse_positive_int(
+            "EVENT_RATE_LIMIT_PER_MINUTE",
+            os.getenv("EVENT_RATE_LIMIT_PER_MINUTE", ""),
+            60,
+        ),
+        event_max_payload_bytes=_parse_positive_int(
+            "EVENT_MAX_PAYLOAD_BYTES",
+            os.getenv("EVENT_MAX_PAYLOAD_BYTES", ""),
+            32768,
+        ),
         sentry_dsn=os.getenv("SENTRY_DSN") or None,
     )
     settings.validate_required()

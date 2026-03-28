@@ -76,9 +76,12 @@ REDIS_URL=redis://localhost:6379/0
 
 TELEGRAM_BOT_TOKEN=your_token_here
 TELEGRAM_ALLOWED_USER_IDS=123456789,987654321
+TELEGRAM_ADMIN_USER_IDS=123456789
 
 SENTRY_DSN=
 API_SHARED_SECRET=change_me
+EVENT_RATE_LIMIT_PER_MINUTE=60
+EVENT_MAX_PAYLOAD_BYTES=32768
 ```
 
 ## Prerequisites
@@ -156,6 +159,12 @@ If you use `pip + venv`, run:
 ```bash
 source .venv/bin/activate
 uvicorn app.main:app --reload --port 8000
+```
+
+### Run Bot (locally)
+
+```bash
+uv run python -c "from app.bot.app import build_bot_application; build_bot_application().run_polling()"
 ```
 
 ### Health Check
