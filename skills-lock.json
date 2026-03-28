@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "skills": {
+    "SQLite Database Expert": {
+      "source": "martinholovsky/claude-skills-generator",
+      "sourceType": "github",
+      "computedHash": "0e75baa1c3159dba4c6db79330634327039c9813410256b73357dcbb0ed9d0ea"
+    },
+    "apscheduler": {
+      "source": "slanycukr/riot-api-project",
+      "sourceType": "github",
+      "computedHash": "02114bf22c8e8e66fd34f0872fd9e5fe1a8f0966986f25bdf7870b3c76cbeef1"
+    },
+    "celery-expert": {
+      "source": "martinholovsky/claude-skills-generator",
+      "sourceType": "github",
+      "computedHash": "a0bc038bb3a9c930024720a2f34eb5fa7aad2152171cc7f7943afdf8c98f7f60"
+    },
+    "fastapi": {
+      "source": "fastapi/fastapi",
+      "sourceType": "github",
+      "computedHash": "ee23d5285caf055cf164ff45dd34888d381143564666baacab8aa786f22e413a"
+    },
+    "fastapi-python": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "computedHash": "1d7346210a6690d2faeb089f074c0dc20a7056c2c83ac1062a11c1b73158be72"
+    },
+    "fastapi-templates": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "8fdfb9bad6aef892b4f16ef3b07ef5eea3b0497d37eeaeddb07244d657cc8711"
+    },
+    "logging-best-practices": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "computedHash": "3014f6c866622db4de48a1f4872b594b33b242017d5e75fbd595e1307eef6991"
+    },
+    "python-telegram-bot": {
+      "source": "genius-cai/finance-ai",
+      "sourceType": "github",
+      "computedHash": "703fce341e58a3b356f3151c51ef811537d1df4e141a4e93a0e23aa4a26d5983"
+    },
+    "redis-development": {
+      "source": "redis/agent-skills",
+      "sourceType": "github",
+      "computedHash": "d27174128aebe583d5ca15747389c84e286daed589bfa2b99847392a012719b5"
+    },
+    "sqlalchemy-orm": {
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github",
+      "computedHash": "b3e79184c5ac53544551e38ee2906cb1e7d62d6ed9debbbf6f30f86f17e8dfa1"
+    },
+    "sqlmodel-expert": {
+      "source": "bilalmk/todo_correct",
+      "sourceType": "github",
+      "computedHash": "1c1522cc9d347eb8dc6aeff240da1f2ba613f0a73e376c5a0922d770e5ce7ebf"
+    },
+    "telegram-bot-builder": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "0170a008eca8694afd9776eb34490e6c6013974497d90cc60aeb39339dd3e3a9"
+    }
+  }
+}
