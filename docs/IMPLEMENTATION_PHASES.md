@@ -32,7 +32,7 @@ Note: for this project, the normal local runtime should use Docker Compose so AP
 - [x] Add runtime deps: `fastapi`, `uvicorn`, `python-telegram-bot`, `sqlmodel`, `sqlalchemy`, `celery`, `redis`, `apscheduler`, `sentry-sdk`
 - [x] Add dev deps: `pytest`, `ruff`
 - [x] Confirm app boots without import errors
-- [ ] Add coverage tooling: `pytest-cov`
+- [x] Add coverage tooling: `pytest-cov`
 
 ## Phase 1 - Core Configuration
 
