@@ -6,11 +6,14 @@ from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine, select
 
+from app.core.settings import get_settings
 from app import main as main_module
 from app.db.session import get_session
 from app.main import app
 from app.models.entities import Event
 from app.workers import tasks
+
+API_SECRET = get_settings().api_shared_secret
 
 
 def _session_override(engine) -> Generator[Session, None, None]:
@@ -52,7 +55,7 @@ def test_api_event_to_worker_notification_flow(monkeypatch) -> None:
     client = TestClient(app)
     response = client.post(
         "/events",
-        headers={"X-API-SECRET": "dev-shared-secret"},
+        headers={"X-API-SECRET": API_SECRET},
         json={"source": "cron", "event_type": "job.failed", "payload": {}, "status": "error"},
     )
 

@@ -6,9 +6,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine, select
 
+from app.core.settings import get_settings
 from app.db.session import get_session
 from app.main import app
 from app.models.entities import Event
+
+API_SECRET = get_settings().api_shared_secret
 
 
 class _InMemoryRateLimiter:
@@ -65,7 +68,7 @@ def test_post_events_persists_event_and_returns_created() -> None:
 
     response = client.post(
         "/events",
-        headers={"X-API-SECRET": "dev-shared-secret"},
+        headers={"X-API-SECRET": API_SECRET},
         json={
             "source": " cron ",
             "event_type": " JOB.FINISHED ",
@@ -104,7 +107,7 @@ def test_post_events_enqueues_worker_notification(monkeypatch) -> None:
 
     response = client.post(
         "/events",
-        headers={"X-API-SECRET": "dev-shared-secret"},
+        headers={"X-API-SECRET": API_SECRET},
         json={
             "source": "svc",
             "event_type": "build.done",
@@ -128,7 +131,7 @@ def test_post_events_rejects_oversized_payload() -> None:
 
     response = client.post(
         "/events",
-        headers={"X-API-SECRET": "dev-shared-secret"},
+        headers={"X-API-SECRET": API_SECRET},
         json={"source": "cron", "event_type": "job.done", "payload": large_payload},
     )
 
@@ -151,12 +154,12 @@ def test_post_events_throttles_when_limit_exceeded(monkeypatch) -> None:
 
     first = client.post(
         "/events",
-        headers={"X-API-SECRET": "dev-shared-secret"},
+        headers={"X-API-SECRET": API_SECRET},
         json={"source": "cron", "event_type": "job.done", "payload": {}},
     )
     second = client.post(
         "/events",
-        headers={"X-API-SECRET": "dev-shared-secret"},
+        headers={"X-API-SECRET": API_SECRET},
         json={"source": "cron", "event_type": "job.done", "payload": {}},
     )
 
