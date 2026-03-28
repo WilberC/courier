@@ -36,10 +36,20 @@
       "sourceType": "github",
       "computedHash": "3014f6c866622db4de48a1f4872b594b33b242017d5e75fbd595e1307eef6991"
     },
+    "pytest": {
+      "source": "claude-dev-suite/claude-dev-suite",
+      "sourceType": "github",
+      "computedHash": "b1f6b0883617a233f65235d61c18e67ced4eb96c97e91ce567f3eee18a8732ca"
+    },
     "python-telegram-bot": {
       "source": "genius-cai/finance-ai",
       "sourceType": "github",
       "computedHash": "703fce341e58a3b356f3151c51ef811537d1df4e141a4e93a0e23aa4a26d5983"
+    },
+    "python-testing-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "69915bb276b6aec61fe5b283a933f96584f66d14b616ce2060d95757629c6866"
     },
     "redis-development": {
       "source": "redis/agent-skills",
