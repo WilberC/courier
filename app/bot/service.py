@@ -1,12 +1,22 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from dataclasses import dataclass
 
 from sqlmodel import Session, desc, select
 
 from app.models.entities import ActionRun, CommandLog, Event
 
 TaskSender = Callable[[str], None]
+CommandHandler = Callable[[int, list[str]], str]
+
+
+@dataclass
+class ActionBinding:
+    name: str
+    executor: Callable[[], str]
+    admin_only: bool = True
+    description: str = ""
 
 
 class BotService:
@@ -23,32 +33,97 @@ class BotService:
         self.admin_user_ids = set(admin_user_ids)
         self.task_sender = task_sender
 
+        self.command_registry: dict[str, CommandHandler] = {}
+        self.action_registry: dict[str, ActionBinding] = {}
+
+        self._register_default_commands()
+        self._register_default_actions()
+
+    def register_command(self, command: str, handler: CommandHandler) -> None:
+        self.command_registry[command] = handler
+
+    def link_task_action(
+        self,
+        *,
+        action_name: str,
+        task_name: str,
+        admin_only: bool = True,
+        description: str = "",
+    ) -> None:
+        def _executor() -> str:
+            self.task_sender(task_name)
+            return f"Task queued: {action_name}"
+
+        self.action_registry[action_name] = ActionBinding(
+            name=action_name,
+            executor=_executor,
+            admin_only=admin_only,
+            description=description,
+        )
+
     def process_command(self, *, user_id: int, command: str, args: list[str]) -> str:
         if user_id not in self.allowed_user_ids:
             message = "You are not authorized to use this bot."
             self._log_command(user_id=user_id, command=command, result=message, status="denied")
             return message
 
-        result = self._dispatch_command(user_id=user_id, command=command, args=args)
+        handler = self.command_registry.get(command)
+        if not handler:
+            result = "Unknown command. Use /help"
+            self._log_command(user_id=user_id, command=command, result=result, status="unknown")
+            return result
+
+        result = handler(user_id, args)
         self._log_command(user_id=user_id, command=command, result=result, status="ok")
         return result
 
-    def _dispatch_command(self, *, user_id: int, command: str, args: list[str]) -> str:
-        if command == "/ping":
-            return "Pong. Courier bot is running."
-        if command == "/help":
-            return (
-                "Available commands: /ping, /help, /status, /last_errors, /run <task>\n"
-                "Run task is admin-only."
-            )
-        if command == "/status":
-            return self._status_summary()
-        if command == "/last_errors":
-            return self._last_errors()
-        if command == "/run":
-            task = args[0] if args else ""
-            return self._run_task(user_id=user_id, task_name=task)
-        return "Unknown command. Use /help"
+    def _register_default_commands(self) -> None:
+        self.register_command("/ping", self._cmd_ping)
+        self.register_command("/help", self._cmd_help)
+        self.register_command("/status", self._cmd_status)
+        self.register_command("/last_errors", self._cmd_last_errors)
+        self.register_command("/run", self._cmd_run)
+
+    def _register_default_actions(self) -> None:
+        self.link_task_action(
+            action_name="ping_worker",
+            task_name="courier.ping",
+            admin_only=True,
+            description="Send a ping task to Celery worker",
+        )
+
+    def _cmd_ping(self, _user_id: int, _args: list[str]) -> str:
+        return "Pong. Courier bot is running."
+
+    def _cmd_help(self, _user_id: int, _args: list[str]) -> str:
+        command_list = ", ".join(sorted(self.command_registry.keys()))
+        action_list = ", ".join(sorted(self.action_registry.keys())) or "none"
+        return (
+            f"Available commands: {command_list}\n"
+            f"Run usage: /run <action_name>\n"
+            f"Available actions: {action_list}"
+        )
+
+    def _cmd_status(self, _user_id: int, _args: list[str]) -> str:
+        return self._status_summary()
+
+    def _cmd_last_errors(self, _user_id: int, _args: list[str]) -> str:
+        return self._last_errors()
+
+    def _cmd_run(self, user_id: int, args: list[str]) -> str:
+        action_name = args[0] if args else ""
+        if not action_name:
+            return "Missing action name. Usage: /run <action_name>"
+
+        action = self.action_registry.get(action_name)
+        if not action:
+            allowed = ", ".join(sorted(self.action_registry.keys())) or "none"
+            return f"Action not allowed. Allowed actions: {allowed}"
+
+        if action.admin_only and user_id not in self.admin_user_ids:
+            return "This command requires admin role."
+
+        return action.executor()
 
     def _status_summary(self) -> str:
         with Session(self.engine) as session:
@@ -83,16 +158,6 @@ class BotService:
         for row in rows:
             lines.append(f"- {row.event_type} ({row.status})")
         return "\n".join(lines)
-
-    def _run_task(self, *, user_id: int, task_name: str) -> str:
-        if user_id not in self.admin_user_ids:
-            return "This command requires admin role."
-
-        if task_name != "ping_worker":
-            return "Task not allowed. Allowed tasks: ping_worker"
-
-        self.task_sender("courier.ping")
-        return "Task queued: ping_worker"
 
     def _log_command(self, *, user_id: int, command: str, result: str, status: str) -> None:
         with Session(self.engine) as session:

@@ -228,6 +228,39 @@ Coverage gates:
 - Global minimum: **85%**
 - Critical paths (`app/api`, `app/workers`, `app/core`): target **90%+**
 
+## Extending Commands and Jobs (Reusable Pattern)
+
+The bot uses a registry pattern in `BotService` so new integrations are easy:
+
+- `register_command("/your_command", handler)`
+- `link_task_action(action_name="...", task_name="...")` for `/run <action_name>`
+
+Example:
+
+```python
+from app.bot.service import BotService
+
+service = BotService(
+    engine=engine,
+    allowed_user_ids=[...],
+    admin_user_ids=[...],
+    task_sender=celery_sender,
+)
+
+# 1) Add a fully custom command
+service.register_command("/hello", lambda user_id, args: "hello world")
+
+# 2) Link a new job so it runs through /run
+service.link_task_action(
+    action_name="sync_data",
+    task_name="courier.sync_data",
+    admin_only=True,
+    description="Sync external data"
+)
+```
+
+This means adding a new command/job does not require changing the core router logic.
+
 ## Development Roadmap
 
 1. Scaffold FastAPI service and health endpoint

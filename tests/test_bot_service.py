@@ -104,3 +104,41 @@ def test_last_errors_returns_recent_failure_events() -> None:
     message = service.process_command(user_id=100, command="/last_errors", args=[])
 
     assert "job.failed" in message
+
+
+def test_can_register_custom_command_without_core_changes() -> None:
+    engine = _engine_for_test()
+    SQLModel.metadata.create_all(engine)
+    service = BotService(
+        engine=engine,
+        allowed_user_ids=[100],
+        admin_user_ids=[100],
+        task_sender=lambda *_: None,
+    )
+
+    service.register_command("/hello", lambda _user_id, _args: "hello world")
+    message = service.process_command(user_id=100, command="/hello", args=[])
+
+    assert message == "hello world"
+
+
+def test_can_link_new_action_to_run_command_easily() -> None:
+    calls: list[str] = []
+
+    def _sender(task_name: str) -> None:
+        calls.append(task_name)
+
+    engine = _engine_for_test()
+    SQLModel.metadata.create_all(engine)
+    service = BotService(
+        engine=engine,
+        allowed_user_ids=[100],
+        admin_user_ids=[100],
+        task_sender=_sender,
+    )
+
+    service.link_task_action(action_name="sync_data", task_name="courier.sync_data")
+    message = service.process_command(user_id=100, command="/run", args=["sync_data"])
+
+    assert "queued" in message.lower()
+    assert calls == ["courier.sync_data"]
