@@ -3,11 +3,14 @@ from __future__ import annotations
 from telegram.ext import Application, CommandHandler
 
 from app.bot.handlers import help_cmd, last_errors, ping, run_cmd, status_cmd
+from app.core.observability import configure_logging, init_sentry_if_enabled
 from app.core.settings import get_settings
 
 
 def build_bot_application() -> Application:
     settings = get_settings()
+    configure_logging()
+    init_sentry_if_enabled(settings)
     application = Application.builder().token(settings.telegram_bot_token).build()
 
     application.add_handler(CommandHandler("ping", ping))

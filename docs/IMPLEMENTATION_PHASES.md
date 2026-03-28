@@ -100,59 +100,59 @@ Note: for this project, the normal local runtime should use Docker Compose so AP
 
 ### Queue Configuration Checklist
 - [x] Configure Celery app and Redis broker
-- [ ] Define notification task(s)
-- [ ] Define action execution task(s)
-- [ ] Add retry policy for transient failures
+- [x] Define notification task(s)
+- [x] Define action execution task(s)
+- [x] Add retry policy for transient failures
 
 ### Worker Behavior Checklist
-- [ ] Ensure idempotent tasks where possible
-- [ ] Persist task outcomes to DB
-- [ ] Notify bot on task success/failure
+- [x] Ensure idempotent tasks where possible
+- [x] Persist task outcomes to DB
+- [x] Notify bot on task success/failure
 
 ## Phase 6 - Actions and Script Integration
 
 ### Action Runner Checklist
-- [ ] Build a whitelist registry for allowed actions
-- [ ] Map action name -> script/function
-- [ ] Validate command args before execution
-- [ ] Capture stdout/stderr and exit code
-- [ ] Apply execution timeout per action
+- [x] Build a whitelist registry for allowed actions
+- [x] Map action name -> script/function
+- [x] Validate command args before execution
+- [x] Capture stdout/stderr and exit code
+- [x] Apply execution timeout per action
 
 ### Safety Checklist
-- [ ] Never execute raw user input as shell command
-- [ ] Block dangerous parameters
-- [ ] Audit-log every action run
+- [x] Never execute raw user input as shell command
+- [x] Block dangerous parameters
+- [x] Audit-log every action run
 
 ## Phase 7 - Observability and Reliability
 
 ### Logging Checklist
-- [ ] Add structured logging
-- [ ] Include correlation IDs (event ID, task ID)
-- [ ] Log incoming events, bot commands, task lifecycle
+- [x] Add structured logging
+- [x] Include correlation IDs (event ID, task ID)
+- [x] Log incoming events, bot commands, task lifecycle
 
 ### Error Monitoring Checklist
-- [ ] Configure Sentry
-- [ ] Capture API exceptions
-- [ ] Capture worker exceptions
-- [ ] Capture bot command exceptions
+- [x] Configure Sentry
+- [x] Capture API exceptions
+- [x] Capture worker exceptions
+- [x] Capture bot command exceptions
 
 ### Reliability Checklist
-- [ ] Add graceful shutdown handling
-- [ ] Add retry/backoff for Telegram API failures
-- [ ] Add health checks for API/worker/redis
+- [x] Add graceful shutdown handling
+- [x] Add retry/backoff for Telegram API failures
+- [x] Add health checks for API/worker/redis
 
 ## Phase 8 - Testing and Quality
 
 Goal: implement and enforce the global TDD + coverage policies in automation (CI + local commands).
 
 ### Test Checklist
-- [ ] Unit tests for settings and validators
-- [ ] Unit tests for bot command handlers
-- [ ] API tests for `/health` and `POST /events`
-- [ ] Worker tests for notification/action tasks
-- [ ] Permission tests (authorized vs unauthorized user)
+- [x] Unit tests for settings and validators
+- [x] Unit tests for bot command handlers
+- [x] API tests for `/health` and `POST /events`
+- [x] Worker tests for notification/action tasks
+- [x] Permission tests (authorized vs unauthorized user)
 - [ ] Add regression test for every production bug before applying fix
-- [ ] Add integration tests for API -> queue -> worker flow
+- [x] Add integration tests for API -> queue -> worker flow
 
 ### TDD Workflow Checklist
 - [ ] `RED`: write failing test for new behavior
@@ -163,15 +163,15 @@ Goal: implement and enforce the global TDD + coverage policies in automation (CI
 
 ### Test Execution Checklist
 - [ ] Local quick run: `uv run pytest -q`
-- [ ] Lint + tests gate: `uv run ruff check app tests && uv run pytest -q`
-- [ ] Coverage run: `uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=85`
+- [x] Lint + tests gate: `uv run ruff check app tests && uv run pytest -q`
+- [x] Coverage run: `uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=85`
 - [ ] Docker verification run: `docker compose run --rm api pytest -q`
-- [ ] CI must block merge on any failing test
-- [ ] CI must block merge on coverage below threshold
+- [x] CI must block merge on any failing test
+- [x] CI must block merge on coverage below threshold
 
 ### Code Quality Checklist
-- [ ] Add Ruff config and run lint checks
-- [ ] Add basic formatting/lint step to CI
+- [x] Add Ruff config and run lint checks
+- [x] Add basic formatting/lint step to CI
 - [ ] Ensure zero failing tests before merge
 
 ## Phase 9 - Local Deployment and Operations
@@ -185,18 +185,18 @@ Goal: implement and enforce the global TDD + coverage policies in automation (CI
 
 ### Runbook Checklist
 - [x] Document how to start all services
-- [ ] Document how to rotate bot token
-- [ ] Document backup/restore for SQLite file
-- [ ] Document common failure recovery steps
+- [x] Document how to rotate bot token
+- [x] Document backup/restore for SQLite file
+- [x] Document common failure recovery steps
 
 ## Phase 10 - MVP Exit Criteria
 
 - [ ] Bot responds to core commands reliably
-- [ ] External scripts can push events successfully
-- [ ] Events generate notifications through worker
-- [ ] One safe action can be triggered from chat
-- [ ] Logs + errors are observable
-- [ ] System can be started locally in one command
+- [x] External scripts can push events successfully
+- [x] Events generate notifications through worker
+- [x] One safe action can be triggered from chat
+- [x] Logs + errors are observable
+- [x] System can be started locally in one command
 - [ ] All implemented features are covered by tests and passing
 
 ## Nice-to-Have (After MVP)

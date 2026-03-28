@@ -176,7 +176,7 @@ curl http://127.0.0.1:8000/health
 Expected response:
 
 ```json
-{"status":"ok","env":"development"}
+{"status":"ok|degraded","env":"development","dependencies":{"api":true,"database":true,"redis":true,"worker":true}}
 ```
 
 ## Development Commands
@@ -227,6 +227,41 @@ docker compose run --rm api pytest --cov=app --cov-report=term-missing --cov-fai
 Coverage gates:
 - Global minimum: **85%**
 - Critical paths (`app/api`, `app/workers`, `app/core`): target **90%+**
+
+## Operations Runbook
+
+### Rotate Telegram Bot Token
+
+1. Generate a new token with BotFather in Telegram.
+2. Update `TELEGRAM_BOT_TOKEN` in `.env`.
+3. Restart services:
+
+```bash
+docker compose up -d --build api worker
+```
+
+4. Revoke the previous token in BotFather once validation is complete.
+
+### Backup and Restore SQLite
+
+Backup:
+
+```bash
+cp courier.db backups/courier-$(date +%Y%m%d-%H%M%S).db
+```
+
+Restore:
+
+```bash
+cp backups/<backup-file>.db courier.db
+docker compose restart api worker
+```
+
+### Common Failure Recovery
+
+1. API unhealthy: check `docker compose logs -f api`, then verify `.env` values and DB file path.
+2. Redis or worker unhealthy: check `docker compose logs -f redis worker`, then run `docker compose restart redis worker`.
+3. Stuck queue: restart worker, verify Redis connectivity, then re-send critical events using `POST /events`.
 
 ## Extending Commands and Jobs (Reusable Pattern)
 

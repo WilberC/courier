@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import logging
+import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
@@ -11,8 +13,10 @@ from app.api.schemas import EventIn, EventOut
 from app.core.settings import get_settings
 from app.db.session import get_session
 from app.models.entities import Event
+from app.workers.celery_app import celery_app
 
 router = APIRouter(tags=["events"])
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 rate_limiter = FixedWindowRateLimiter(limit=max(settings.event_rate_limit_per_minute, 1))
@@ -34,6 +38,9 @@ def create_event(
     session: Session = Depends(get_session),
     x_api_secret: Optional[str] = Header(default=None, alias="X-API-SECRET"),  # noqa: UP045
 ) -> Event:
+    request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+    logger.info("Incoming event request", extra={"request_id": request_id, "status": "started"})
+
     if x_api_secret != settings.api_shared_secret:
         raise HTTPException(status_code=401, detail="Invalid API shared secret")
 
@@ -56,5 +63,23 @@ def create_event(
     session.add(event)
     session.commit()
     session.refresh(event)
+    logger.info(
+        "Event persisted",
+        extra={"request_id": request_id, "event_id": event.id, "status": event.status},
+    )
+    try:
+        celery_app.send_task(
+            "courier.notify",
+            kwargs={
+                "message": f"[{event.status}] {event.source}:{event.event_type}",
+                "event_id": event.id,
+                "request_id": request_id,
+            },
+        )
+    except Exception:  # pragma: no cover - do not fail ingestion on queue issues
+        logger.exception(
+            "Failed to queue notification for event",
+            extra={"request_id": request_id, "event_id": event.id},
+        )
 
     return event

@@ -89,6 +89,39 @@ def test_post_events_persists_event_and_returns_created() -> None:
     app.dependency_overrides.clear()
 
 
+def test_post_events_enqueues_worker_notification(monkeypatch) -> None:
+    from app.api import events as events_module
+
+    app.dependency_overrides.clear()
+    queued: list[tuple[str, dict]] = []
+
+    def _fake_send_task(task_name: str, kwargs: dict | None = None):
+        queued.append((task_name, kwargs or {}))
+
+    monkeypatch.setattr(events_module.celery_app, "send_task", _fake_send_task)
+    events_module.rate_limiter = _InMemoryRateLimiter(limit=5)
+    client = TestClient(app)
+
+    response = client.post(
+        "/events",
+        headers={"X-API-SECRET": "dev-shared-secret"},
+        json={
+            "source": "svc",
+            "event_type": "build.done",
+            "payload": {"id": 1},
+            "status": "received",
+        },
+    )
+
+    assert response.status_code == 201
+    assert len(queued) == 1
+    assert queued[0][0] == "courier.notify"
+    assert queued[0][1]["event_id"] == response.json()["id"]
+    assert "request_id" in queued[0][1]
+
+    monkeypatch.setattr(events_module, "rate_limiter", rate_limiter)
+
+
 def test_post_events_rejects_oversized_payload() -> None:
     client = TestClient(app)
     large_payload = {"blob": "x" * 40000}

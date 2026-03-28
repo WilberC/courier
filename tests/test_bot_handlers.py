@@ -3,6 +3,8 @@ from __future__ import annotations
 import asyncio
 from types import SimpleNamespace
 
+from telegram.error import TimedOut
+
 from app.bot import handlers
 
 
@@ -11,6 +13,18 @@ class _FakeMessage:
         self.replies: list[str] = []
 
     async def reply_text(self, message: str) -> None:
+        self.replies.append(message)
+
+
+class _FlakyMessage:
+    def __init__(self) -> None:
+        self.calls = 0
+        self.replies: list[str] = []
+
+    async def reply_text(self, message: str) -> None:
+        self.calls += 1
+        if self.calls == 1:
+            raise TimedOut("temporary")
         self.replies.append(message)
 
 
@@ -49,3 +63,16 @@ def test_run_handler_passes_args(monkeypatch) -> None:
     asyncio.run(handlers.run_cmd(update, context))
 
     assert fake_service.calls == [(7, "/run", ["ping_worker"])]
+
+
+def test_handle_retries_on_telegram_timeout(monkeypatch) -> None:
+    fake_service = _FakeService("ok")
+    monkeypatch.setattr(handlers, "service", fake_service)
+
+    message = _FlakyMessage()
+    update = SimpleNamespace(effective_user=SimpleNamespace(id=7), message=message)
+    context = SimpleNamespace(args=[])
+
+    asyncio.run(handlers.ping(update, context))
+
+    assert message.replies == ["ok"]

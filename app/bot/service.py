@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+import logging
 
 from sqlmodel import Session, desc, select
 
@@ -9,6 +10,7 @@ from app.models.entities import ActionRun, CommandLog, Event
 
 TaskSender = Callable[[str], None]
 CommandHandler = Callable[[int, list[str]], str]
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -62,6 +64,7 @@ class BotService:
         )
 
     def process_command(self, *, user_id: int, command: str, args: list[str]) -> str:
+        logger.info("Processing bot command", extra={"command": command, "status": "started"})
         if user_id not in self.allowed_user_ids:
             message = "You are not authorized to use this bot."
             self._log_command(user_id=user_id, command=command, result=message, status="denied")
@@ -75,6 +78,7 @@ class BotService:
 
         result = handler(user_id, args)
         self._log_command(user_id=user_id, command=command, result=result, status="ok")
+        logger.info("Bot command processed", extra={"command": command, "status": "ok"})
         return result
 
     def _register_default_commands(self) -> None:

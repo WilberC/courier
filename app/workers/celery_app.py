@@ -1,8 +1,11 @@
 from celery import Celery
 
+from app.core.observability import configure_logging, init_sentry_if_enabled
 from app.core.settings import get_settings
 
 settings = get_settings()
+configure_logging()
+init_sentry_if_enabled(settings)
 
 celery_app = Celery(
     "courier",
