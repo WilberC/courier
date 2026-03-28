@@ -1,0 +1,60 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: courier-api
+    env_file:
+      - .env
+    environment:
+      APP_ENV: development
+      APP_PORT: 8000
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: sqlite:////app/data/courier.db
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    volumes:
+      - courier_data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: courier-worker
+    env_file:
+      - .env
+    environment:
+      APP_ENV: development
+      APP_PORT: 8000
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: sqlite:////app/data/courier.db
+    command: ["celery", "-A", "app.workers.celery_app:celery_app", "worker", "-l", "info"]
+    volumes:
+      - courier_data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: courier-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  courier_data:
+  redis_data:

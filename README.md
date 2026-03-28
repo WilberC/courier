@@ -72,7 +72,7 @@ APP_ENV=development
 APP_PORT=8000
 
 DATABASE_URL=sqlite:///./courier.db
-REDIS_URL=redis://redis:6379/0
+REDIS_URL=redis://localhost:6379/0
 
 TELEGRAM_BOT_TOKEN=your_token_here
 TELEGRAM_ALLOWED_USER_IDS=123456789,987654321
@@ -81,23 +81,103 @@ SENTRY_DSN=
 API_SHARED_SECRET=change_me
 ```
 
-## Local Setup (uv)
+## Prerequisites
+
+- Python **3.12+**
+- Docker + Docker Compose
+- `uv` (recommended) or `pip` + virtualenv
+
+## Install
+
+### Option A (Recommended): uv
 
 ```bash
 # install uv (macOS/Linux)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# initialize project metadata (if not initialized yet)
-uv init
+# install dependencies from pyproject.toml
+uv sync
+```
 
-# add dependencies
-uv add fastapi uvicorn python-telegram-bot sqlmodel sqlalchemy celery redis apscheduler sentry-sdk
+### Option B: pip + venv
 
-# optional dev dependencies
-uv add --dev pytest ruff
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+pip install pytest ruff
+```
 
-# run the API
+## Configuration
+
+```bash
+cp .env.example .env
+```
+
+Update `.env` with your values:
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_ALLOWED_USER_IDS`
+- `API_SHARED_SECRET`
+
+## Run
+
+### Option A (Recommended): Docker Compose (normal run)
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+```
+
+Services:
+- API: `http://127.0.0.1:8000`
+- Redis: `127.0.0.1:6380`
+- Worker: Celery worker connected to Redis
+
+Check logs:
+
+```bash
+docker compose logs -f api worker redis
+```
+
+Stop:
+
+```bash
+docker compose down
+```
+
+### Option B: Run API locally (without Docker)
+
+```bash
 uv run uvicorn app.main:app --reload --port 8000
+```
+
+If you use `pip + venv`, run:
+
+```bash
+source .venv/bin/activate
+uvicorn app.main:app --reload --port 8000
+```
+
+### Health Check
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Expected response:
+
+```json
+{"status":"ok","env":"development"}
+```
+
+## Development Commands
+
+```bash
+# lint
+uv run ruff check app tests
+
+# quick import/boot sanity check
+uv run python -c "from fastapi.testclient import TestClient; from app.main import app; print(TestClient(app).get('/health').json())"
 ```
 
 ## Development Roadmap

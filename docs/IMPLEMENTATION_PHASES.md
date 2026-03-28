@@ -4,34 +4,37 @@ This document tracks everything needed to configure and deliver the project in s
 
 ## Phase 0 - Project Bootstrap
 
+Note: for this project, the normal local runtime should use Docker Compose so API, worker, and Redis run together consistently.
+
 ### Repository Setup Checklist
-- [ ] Create base folders: `app/`, `tests/`, `scripts/`, `docs/`
-- [ ] Keep `README.md` and `.gitignore` up to date
-- [ ] Add `pyproject.toml` using `uv init`
-- [ ] Define Python version (3.12)
+- [x] Create base folders: `app/`, `tests/`, `scripts/`, `docs/`
+- [x] Keep `README.md` and `.gitignore` up to date
+- [x] Add `pyproject.toml` using `uv init`
+- [x] Define Python version (3.12)
+- [x] Add Docker baseline files (`Dockerfile`, `.dockerignore`, `docker-compose.yml`)
 
 ### Dependencies Checklist
-- [ ] Add runtime deps: `fastapi`, `uvicorn`, `python-telegram-bot`, `sqlmodel`, `sqlalchemy`, `celery`, `redis`, `apscheduler`, `sentry-sdk`
-- [ ] Add dev deps: `pytest`, `ruff`
-- [ ] Confirm app boots without import errors
+- [x] Add runtime deps: `fastapi`, `uvicorn`, `python-telegram-bot`, `sqlmodel`, `sqlalchemy`, `celery`, `redis`, `apscheduler`, `sentry-sdk`
+- [x] Add dev deps: `pytest`, `ruff`
+- [x] Confirm app boots without import errors
 
 ## Phase 1 - Core Configuration
 
 ### Environment Variables Checklist
-- [ ] Create `.env.example` with required keys
-- [ ] Configure `APP_ENV`
-- [ ] Configure `APP_PORT`
-- [ ] Configure `DATABASE_URL` (SQLite)
-- [ ] Configure `REDIS_URL`
-- [ ] Configure `TELEGRAM_BOT_TOKEN`
-- [ ] Configure `TELEGRAM_ALLOWED_USER_IDS`
-- [ ] Configure `API_SHARED_SECRET`
-- [ ] Configure optional `SENTRY_DSN`
+- [x] Create `.env.example` with required keys
+- [x] Configure `APP_ENV`
+- [x] Configure `APP_PORT`
+- [x] Configure `DATABASE_URL` (SQLite)
+- [x] Configure `REDIS_URL`
+- [x] Configure `TELEGRAM_BOT_TOKEN`
+- [x] Configure `TELEGRAM_ALLOWED_USER_IDS`
+- [x] Configure `API_SHARED_SECRET`
+- [x] Configure optional `SENTRY_DSN`
 
 ### App Settings Checklist
-- [ ] Centralize settings loader in `app/core/settings.py`
-- [ ] Validate required environment variables at startup
-- [ ] Add safe defaults for local development
+- [x] Centralize settings loader in `app/core/settings.py`
+- [x] Validate required environment variables at startup
+- [x] Add safe defaults for local development
 
 ## Phase 2 - Database (SQLite + ORM)
 
@@ -80,7 +83,7 @@ This document tracks everything needed to configure and deliver the project in s
 ## Phase 5 - Background Jobs (Celery + Redis)
 
 ### Queue Configuration Checklist
-- [ ] Configure Celery app and Redis broker
+- [x] Configure Celery app and Redis broker
 - [ ] Define notification task(s)
 - [ ] Define action execution task(s)
 - [ ] Add retry policy for transient failures
@@ -139,14 +142,14 @@ This document tracks everything needed to configure and deliver the project in s
 ## Phase 9 - Local Deployment and Operations
 
 ### Docker Compose Checklist
-- [ ] Add API service
-- [ ] Add worker service
-- [ ] Add Redis service
-- [ ] Mount local SQLite volume
-- [ ] Add restart policies
+- [x] Add API service
+- [x] Add worker service
+- [x] Add Redis service
+- [x] Mount local SQLite volume
+- [x] Add restart policies
 
 ### Runbook Checklist
-- [ ] Document how to start all services
+- [x] Document how to start all services
 - [ ] Document how to rotate bot token
 - [ ] Document backup/restore for SQLite file
 - [ ] Document common failure recovery steps
@@ -167,4 +170,3 @@ This document tracks everything needed to configure and deliver the project in s
 - [ ] Multi-chat or multi-tenant support
 - [ ] Optional migration path from SQLite to PostgreSQL
 - [ ] Web UI for action approvals
-
