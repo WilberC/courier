@@ -176,9 +176,48 @@ Expected response:
 # lint
 uv run ruff check app tests
 
+# run tests
+uv run pytest -q
+
 # quick import/boot sanity check
 uv run python -c "from fastapi.testclient import TestClient; from app.main import app; print(TestClient(app).get('/health').json())"
 ```
+
+## Testing Strategy (TDD Required)
+
+This project uses **TDD by default** for **all phases** (including already implemented modules):
+1. Write a failing test first (`RED`)
+2. Implement the smallest change to pass (`GREEN`)
+3. Refactor safely while tests stay green (`REFACTOR`)
+
+Rules for all new features and fixes:
+- Add or update tests before implementing behavior changes
+- Do not merge changes with failing tests
+- Keep unit + integration coverage for critical paths (API, worker, bot commands, permissions)
+- Add missing tests for previously implemented code whenever you touch it
+
+Recommended loop:
+
+```bash
+# 1) run a focused test while implementing
+uv run pytest -q tests
+
+# 2) run full checks before merge
+uv run ruff check app tests
+uv run pytest -q
+uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=85
+```
+
+Docker test run:
+
+```bash
+docker compose run --rm api pytest -q
+docker compose run --rm api pytest --cov=app --cov-report=term-missing --cov-fail-under=85
+```
+
+Coverage gates:
+- Global minimum: **85%**
+- Critical paths (`app/api`, `app/workers`, `app/core`): target **90%+**
 
 ## Development Roadmap
 

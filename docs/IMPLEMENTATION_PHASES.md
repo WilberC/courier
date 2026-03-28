@@ -2,6 +2,21 @@
 
 This document tracks everything needed to configure and deliver the project in small, verifiable phases.
 
+## Global Engineering Policy (Applies To All Phases)
+
+### TDD Policy (Mandatory)
+- [ ] Use TDD for every change from now on: `RED -> GREEN -> REFACTOR`
+- [ ] No code change is complete without automated tests
+- [ ] For already-implemented code, add missing tests before or during next related change
+- [ ] No merge allowed with failing tests
+
+### Coverage Policy (Mandatory)
+- [ ] Track coverage in CI for every pull request
+- [ ] Global minimum coverage: **85%**
+- [ ] Critical paths minimum coverage: **90%** (`app/api`, `app/workers`, `app/core`)
+- [ ] Every bug fix must include a regression test
+- [ ] Coverage must not decrease on modified files
+
 ## Phase 0 - Project Bootstrap
 
 Note: for this project, the normal local runtime should use Docker Compose so API, worker, and Redis run together consistently.
@@ -17,6 +32,7 @@ Note: for this project, the normal local runtime should use Docker Compose so AP
 - [x] Add runtime deps: `fastapi`, `uvicorn`, `python-telegram-bot`, `sqlmodel`, `sqlalchemy`, `celery`, `redis`, `apscheduler`, `sentry-sdk`
 - [x] Add dev deps: `pytest`, `ruff`
 - [x] Confirm app boots without import errors
+- [ ] Add coverage tooling: `pytest-cov`
 
 ## Phase 1 - Core Configuration
 
@@ -127,12 +143,31 @@ Note: for this project, the normal local runtime should use Docker Compose so AP
 
 ## Phase 8 - Testing and Quality
 
+Goal: implement and enforce the global TDD + coverage policies in automation (CI + local commands).
+
 ### Test Checklist
 - [ ] Unit tests for settings and validators
 - [ ] Unit tests for bot command handlers
 - [ ] API tests for `/health` and `POST /events`
 - [ ] Worker tests for notification/action tasks
 - [ ] Permission tests (authorized vs unauthorized user)
+- [ ] Add regression test for every production bug before applying fix
+- [ ] Add integration tests for API -> queue -> worker flow
+
+### TDD Workflow Checklist
+- [ ] `RED`: write failing test for new behavior
+- [ ] `GREEN`: implement minimum code to pass test
+- [ ] `REFACTOR`: improve code while keeping tests green
+- [ ] Keep tests isolated and deterministic (no flaky external dependencies)
+- [ ] Use fixtures/mocks for external services (Telegram, Redis) in unit tests
+
+### Test Execution Checklist
+- [ ] Local quick run: `uv run pytest -q`
+- [ ] Lint + tests gate: `uv run ruff check app tests && uv run pytest -q`
+- [ ] Coverage run: `uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=85`
+- [ ] Docker verification run: `docker compose run --rm api pytest -q`
+- [ ] CI must block merge on any failing test
+- [ ] CI must block merge on coverage below threshold
 
 ### Code Quality Checklist
 - [ ] Add Ruff config and run lint checks
@@ -162,6 +197,7 @@ Note: for this project, the normal local runtime should use Docker Compose so AP
 - [ ] One safe action can be triggered from chat
 - [ ] Logs + errors are observable
 - [ ] System can be started locally in one command
+- [ ] All implemented features are covered by tests and passing
 
 ## Nice-to-Have (After MVP)
 
