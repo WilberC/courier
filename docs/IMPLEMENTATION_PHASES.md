@@ -162,7 +162,7 @@ Goal: implement and enforce the global TDD + coverage policies in automation (CI
 - [ ] Use fixtures/mocks for external services (Telegram, Redis) in unit tests
 
 ### Test Execution Checklist
-- [ ] Local quick run: `uv run pytest -q`
+- [x] Local quick run: `uv run pytest -q`
 - [x] Lint + tests gate: `uv run ruff check app tests && uv run pytest -q`
 - [x] Coverage run: `uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=85`
 - [ ] Docker verification run: `docker compose run --rm api pytest -q`
