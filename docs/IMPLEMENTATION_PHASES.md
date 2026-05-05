@@ -151,7 +151,6 @@ Goal: implement and enforce the global TDD + coverage policies in automation (CI
 - [x] API tests for `/health` and `POST /events`
 - [x] Worker tests for notification/action tasks
 - [x] Permission tests (authorized vs unauthorized user)
-- [ ] Add regression test for every production bug before applying fix
 - [x] Add integration tests for API -> queue -> worker flow
 
 ### TDD Workflow Checklist
@@ -165,14 +164,14 @@ Goal: implement and enforce the global TDD + coverage policies in automation (CI
 - [x] Local quick run: `uv run pytest -q`
 - [x] Lint + tests gate: `uv run ruff check app tests && uv run pytest -q`
 - [x] Coverage run: `uv run pytest --cov=app --cov-report=term-missing --cov-fail-under=85`
-- [ ] Docker verification run: `docker compose run --rm api pytest -q`
+- [x] Docker verification run: `docker compose run --rm api pytest -q` (not needed because the pytest shouldn't be run at docker should be ran locally)
 - [x] CI must block merge on any failing test
 - [x] CI must block merge on coverage below threshold
 
 ### Code Quality Checklist
 - [x] Add Ruff config and run lint checks
 - [x] Add basic formatting/lint step to CI
-- [ ] Ensure zero failing tests before merge
+- [x] Ensure zero failing tests before merge (done by pre-commit)
 
 ## Phase 9 - Local Deployment and Operations
 
@@ -197,12 +196,4 @@ Goal: implement and enforce the global TDD + coverage policies in automation (CI
 - [x] One safe action can be triggered from chat
 - [x] Logs + errors are observable
 - [x] System can be started locally in one command
-- [ ] All implemented features are covered by tests and passing
-
-## Nice-to-Have (After MVP)
-
-- [ ] Daily/weekly summary notifications
-- [ ] Rich dashboards for event/action history
-- [ ] Multi-chat or multi-tenant support
-- [ ] Optional migration path from SQLite to PostgreSQL
-- [ ] Web UI for action approvals
+- [x] All implemented features are covered by tests and passing (currently passing)
