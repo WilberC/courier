@@ -29,8 +29,6 @@ class Settings:
         if self.is_production:
             if not self.telegram_bot_token:
                 missing.append("TELEGRAM_BOT_TOKEN")
-            if not self.api_shared_secret:
-                missing.append("API_SHARED_SECRET")
             if not self.telegram_allowed_user_ids:
                 missing.append("TELEGRAM_ALLOWED_USER_IDS")
 

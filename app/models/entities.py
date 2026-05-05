@@ -7,6 +7,42 @@ from sqlalchemy import JSON, Column
 from sqlmodel import Field, SQLModel
 
 
+class User(SQLModel, table=True):
+    __tablename__ = "botuser"
+
+    id: Optional[int] = Field(default=None, primary_key=True)  # noqa: UP045
+    telegram_user_id: Optional[int] = Field(default=None, unique=True, index=True)  # noqa: UP045
+    username: Optional[str] = None  # noqa: UP045
+    first_name: Optional[str] = None  # noqa: UP045
+    last_name: Optional[str] = None  # noqa: UP045
+    role: str = Field(default="user")
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),  # noqa: UP017
+        index=True,
+    )
+    last_seen_at: Optional[datetime] = None  # noqa: UP045
+    bot_config: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    events_config: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    actions_config: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    notifications_config: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+
+
+class APIKey(SQLModel, table=True):
+    __tablename__ = "apikey"
+
+    id: Optional[int] = Field(default=None, primary_key=True)  # noqa: UP045
+    user_id: int = Field(index=True, foreign_key="botuser.id")
+    name: str
+    key_prefix: str
+    key_hash: str = Field(unique=True, index=True)
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),  # noqa: UP017
+    )
+    last_used_at: Optional[datetime] = None  # noqa: UP045
+
+
 class Event(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)  # noqa: UP045
     source: str

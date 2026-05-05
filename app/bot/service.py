@@ -6,6 +6,7 @@ import logging
 
 from sqlmodel import Session, desc, select
 
+from app.db.users import get_bot_config, upsert_telegram_user
 from app.models.entities import ActionRun, CommandLog, Event
 
 TaskSender = Callable[[str], None]
@@ -63,12 +64,37 @@ class BotService:
             description=description,
         )
 
-    def process_command(self, *, user_id: int, command: str, args: list[str]) -> str:
+    def process_command(
+        self,
+        *,
+        user_id: int,
+        command: str,
+        args: list[str],
+        username: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+    ) -> str:
         logger.info("Processing bot command", extra={"command": command, "status": "started"})
         if user_id not in self.allowed_user_ids:
             message = "You are not authorized to use this bot."
             self._log_command(user_id=user_id, command=command, result=message, status="denied")
             return message
+
+        with Session(self.engine) as session:
+            user = upsert_telegram_user(
+                session,
+                user_id,
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                role="admin" if user_id in self.admin_user_ids else "user",
+            )
+            bot_cfg = get_bot_config(user)
+
+        if bot_cfg.allowed_commands and command not in bot_cfg.allowed_commands:
+            result = "You are not allowed to use this command."
+            self._log_command(user_id=user_id, command=command, result=result, status="denied")
+            return result
 
         handler = self.command_registry.get(command)
         if not handler:

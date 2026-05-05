@@ -26,7 +26,6 @@ def test_get_settings_uses_safe_defaults_in_development(monkeypatch: pytest.Monk
 def test_get_settings_validates_production_required_vars(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
-    monkeypatch.delenv("API_SHARED_SECRET", raising=False)
     monkeypatch.delenv("TELEGRAM_ALLOWED_USER_IDS", raising=False)
     _clear_settings_cache()
 
@@ -35,7 +34,6 @@ def test_get_settings_validates_production_required_vars(monkeypatch: pytest.Mon
 
     message = str(excinfo.value)
     assert "TELEGRAM_BOT_TOKEN" in message
-    assert "API_SHARED_SECRET" in message
     assert "TELEGRAM_ALLOWED_USER_IDS" in message
 
 

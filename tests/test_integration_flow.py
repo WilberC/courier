@@ -6,14 +6,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from app.core.settings import get_settings
 from app import main as main_module
+from app.db.api_keys import create_key
 from app.db.session import get_session
+from app.db.users import upsert_telegram_user
 from app.main import app
 from app.models.entities import Event
 from app.workers import tasks
-
-API_SECRET = get_settings().api_shared_secret
 
 
 def _session_override(engine) -> Generator[Session, None, None]:
@@ -35,6 +34,11 @@ def test_api_event_to_worker_notification_flow(monkeypatch) -> None:
         poolclass=StaticPool,
     )
     SQLModel.metadata.create_all(engine)
+
+    with Session(engine) as session:
+        user = upsert_telegram_user(session, 1, role="admin")
+        _, raw_key = create_key(session, user.id, "integration-test")
+
     app.dependency_overrides[get_session] = _build_session_override(engine)
     monkeypatch.setattr(tasks, "get_engine", lambda: engine)
 
@@ -55,7 +59,7 @@ def test_api_event_to_worker_notification_flow(monkeypatch) -> None:
     client = TestClient(app)
     response = client.post(
         "/events",
-        headers={"X-API-SECRET": API_SECRET},
+        headers={"X-API-KEY": raw_key},
         json={"source": "cron", "event_type": "job.failed", "payload": {}, "status": "error"},
     )
 
